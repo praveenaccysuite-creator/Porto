@@ -27,7 +27,7 @@ import { PortfolioInfo } from "@/types/portfolio";
 
 
 interface aboutProps {
-  aboutData: aboutInfo;
+  aboutData: aboutInfo | null;
   // portfolioInfo: PortfolioInfo;
 }
 

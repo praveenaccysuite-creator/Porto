@@ -12,12 +12,12 @@ import Image from "next/image";
 import { motion, useSpring } from "framer-motion";
 
 import { heroInfo } from "@/services/heroSection.service";
-import { PortfolioInfo } from "@/types/portfolio";
 
 interface TopPageProps {
-  heroData: heroInfo;
+  heroData: heroInfo | null;
   // portfolioInfo: PortfolioInfo;
 }
+
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 30 },

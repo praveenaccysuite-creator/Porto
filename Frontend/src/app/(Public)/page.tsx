@@ -1,5 +1,6 @@
-export const dynamic = "force-static";
-export const revalidate = 30;
+"use client";
+
+import { useEffect, useState } from "react";
 
 import TopPage from "./pages/heroSection";
 import About from "./pages/about";
@@ -16,29 +17,87 @@ import Footer from "./components/Footer";
 
 import { heroService } from "@/services/heroSection.service";
 import { aboutService } from "@/services/aboutSection.service";
-// import { portfolioInfoService } from "@/services/portfolio.service";
 import { experienceService } from "@/services/experience.service";
 import { educationService } from "@/services/education.service";
 import { skillsService } from "@/services/skillSection.service";
-import { majorProjectService } from "@/services/projectService";
-import { minorProjectService } from "@/services/projectService";
+import {
+  majorProjectService,
+  minorProjectService,
+} from "@/services/projectService";
 
-export default async function Home() {
-  const aboutData = await aboutService.getInfo();
-  const heroData = await heroService.getInfo();
-  // const portfolioInfo = await portfolioInfoService.getInfo();
-  const experienceData = await experienceService.getInfo();
-  const educationData = await educationService.getInfo();
-  const skillsData = await skillsService.getInfo();
-  const majorProjects = await majorProjectService.getAll();
-  const minorProjects = await minorProjectService.getAll();
+import type { heroInfo } from "@/services/heroSection.service";
+import type { aboutInfo } from "@/services/aboutSection.service";
+import type { experienceInfo } from "@/services/experience.service";
+import type { educationInfo } from "@/services/education.service";
+import type { SkillInfo } from "@/services/skillSection.service";
+import type {
+  minorProjectInfo,
+  MajorProjectInfo,
+} from "@/services/projectService";
+
+export default function Home() {
+  const [heroData, setHeroData] = useState<heroInfo | null>(null);
+
+  const [aboutData, setAboutData] =
+    useState<aboutInfo | null>(null);
+
+  const [experienceData, setExperienceData] =
+    useState<experienceInfo[]>([]);
+
+  const [educationData, setEducationData] =
+    useState<educationInfo[]>([]);
+
+  const [skillsData, setSkillsData] =
+    useState<SkillInfo[]>([]);
+
+  const [majorProjects, setMajorProjects] =
+    useState<MajorProjectInfo[]>([]);
+
+  const [minorProjects, setMinorProjects] =
+    useState<minorProjectInfo[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [
+          about,
+          hero,
+          experience,
+          education,
+          skills,
+          major,
+          minor,
+        ] = await Promise.all([
+          aboutService.getInfo(),
+          heroService.getInfo(),
+          experienceService.getInfo(),
+          educationService.getInfo(),
+          skillsService.getInfo(),
+          majorProjectService.getAll(),
+          minorProjectService.getAll(),
+        ]);
+
+        setAboutData(about);
+        setHeroData(hero);
+        setExperienceData(experience);
+        setEducationData(education);
+        setSkillsData(skills);
+        setMajorProjects(major);
+        setMinorProjects(minor);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
     <>
       <GradientBackground />
 
       <ScrollSectionClient id="hero">
-        <TopPage heroData={heroData}  />
+        <TopPage heroData={heroData} />
       </ScrollSectionClient>
 
       <ScrollSectionClient id="about">
