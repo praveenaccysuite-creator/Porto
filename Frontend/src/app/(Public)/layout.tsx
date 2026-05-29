@@ -1,5 +1,8 @@
 import React from "react";
 import ClientWrapper from "./ClientWrapper";
+import { fetchHomePageData } from "@/lib/fetchHomeData";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Praveen's Portfolio",
@@ -10,12 +13,16 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { portfolioInfo } = await fetchHomePageData();
+
   return (
-        <ClientWrapper>{children}</ClientWrapper>
+    <ClientWrapper initialPortfolioInfo={portfolioInfo}>
+      {children}
+    </ClientWrapper>
   );
 }

@@ -8,10 +8,11 @@ import {
   AiFillGithub,
   AiOutlineJavaScript,
 } from "react-icons/ai";
-import Image from "next/image";
 import { motion, useSpring } from "framer-motion";
 
 import { heroInfo } from "@/services/heroSection.service";
+import { usePortfolioInfoContext } from "@/app/context/PortfolioInfoContext";
+import RemoteImage from "../components/ui/RemoteImage";
 
 interface TopPageProps {
   heroData: heroInfo | null;
@@ -26,19 +27,14 @@ const fadeUp = (delay: number) => ({
 });
 
 const TopPage = ({ heroData }: TopPageProps) => {
-  const info = {
-    email: "john.doe@example.com",
-    phone: "+1234567890",
-    location: "New York, USA",
-    profileImage: "/images/profile.jpg",
-    socialLinks: {
-      github: "https://github.com/johndoe",
-      linkedin: "https://linkedin.com/in/johndoe",
-      twitter: "https://twitter.com/johndoe",
-      instagram: "https://instagram.com/johndoe",
-    },
-  };
+  const { info } = usePortfolioInfoContext();
   const bioContent = heroData;
+  const profileImage =
+    typeof info?.profileImage === "string" ? info.profileImage : "/assets/img/about.webp";
+  const linkedinUrl = info?.socialLinks?.linkedin ?? "#";
+  const githubUrl = info?.socialLinks?.github ?? "#";
+  const twitterUrl = info?.socialLinks?.twitter ?? "#";
+  const email = info?.email ?? "";
 
   const imageCardRef = useRef<HTMLDivElement>(null);
   const rotateX = useSpring(0, { damping: 30, stiffness: 100, mass: 2 });
@@ -81,7 +77,7 @@ const TopPage = ({ heroData }: TopPageProps) => {
                   Connect me on LinkedIn.{" "}
                   <a
                     target="_blank"
-                    href={info?.socialLinks?.linkedin}
+                    href={linkedinUrl}
                     className="font-semibold text-indigo-600"
                   >
                     <span
@@ -129,12 +125,14 @@ const TopPage = ({ heroData }: TopPageProps) => {
                 </motion.div>
 
                 {/* 4️⃣ PARAGRAPH */}
-                <motion.p
-                  {...fadeUp(0.55)}
-                  className="mt-8 text-pretty text-lg font-medium text-gray-500 dark:text-gray-100 sm:text-xl/8"
-                >
-                  {bioContent?.bio || "No bio available"}
-                </motion.p>
+                {bioContent?.bio && (
+                  <motion.p
+                    {...fadeUp(0.55)}
+                    className="mt-8 text-pretty text-lg font-medium text-gray-500 dark:text-gray-100 sm:text-xl/8"
+                  >
+                    {bioContent.bio}
+                  </motion.p>
+                )}
 
                 {/* 5️⃣ BUTTONS */}
                 <motion.div
@@ -143,7 +141,7 @@ const TopPage = ({ heroData }: TopPageProps) => {
                 >
                   <a
                     target="_blank"
-                    href={`mailto:${info?.email}`}
+                    href={email ? `mailto:${email}` : "#contact"}
                     className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   >
                     Hire Me
@@ -179,15 +177,14 @@ const TopPage = ({ heroData }: TopPageProps) => {
                 >
                   {/* Main Image */}
                   <div className="hero-image-wrapper border border-red-500 dark:border-gray-100">
-                    {typeof info?.profileImage === "string" && (
-                      <Image
-                        src={info.profileImage}
-                        alt="Avatar"
-                        width={350}
-                        height={350}
-                        priority
-                      />
-                    )}
+                    <RemoteImage
+                      src={profileImage}
+                      alt="Profile"
+                      width={350}
+                      height={350}
+                      priority
+                      className="h-full w-full object-cover"
+                    />
                     {/* Floating Tech Icons */}
                     <span className="circle circle2"></span>
                     <span className="circle circle3"></span>
@@ -212,7 +209,7 @@ const TopPage = ({ heroData }: TopPageProps) => {
                       <div className="hero-social-buttons">
                         <a
                           target="_blank"
-                          href={info?.socialLinks?.twitter}
+                          href={twitterUrl}
                           aria-label="Open Twitter profile"
                           className="hero-social-btn inline-flex items-center justify-center"
                         >
@@ -221,7 +218,7 @@ const TopPage = ({ heroData }: TopPageProps) => {
 
                         <a
                           target="_blank"
-                          href={info?.socialLinks?.linkedin}
+                          href={linkedinUrl}
                           aria-label="Open LinkedIn profile"
                           className="hero-social-btn linkedin inline-flex items-center justify-center"
                         >
@@ -230,7 +227,7 @@ const TopPage = ({ heroData }: TopPageProps) => {
 
                         <a
                           target="_blank"
-                          href={info?.socialLinks?.github}
+                          href={githubUrl}
                           aria-label="Open GitHub profile"
                           className="hero-social-btn github inline-flex items-center justify-center"
                         >

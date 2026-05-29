@@ -13,8 +13,8 @@ const createAbout = asyncHandler(async (req, res) => {
 
   let imageUrl = existing?.imageUrl || "";
 
-  if (req.files?.image?.[0]) {
-    const imageFile = req.files.image[0];
+  if (req.files?.aboutImage?.[0]) {
+    const imageFile = req.files.aboutImage[0];
 
     if (existing?.imageUrl) {
       await deleteFromS3(existing.imageUrl);
@@ -67,13 +67,9 @@ const getAboutSection = asyncHandler(async (req, res) => {
     where: { id: 1 },
   });
 
-  if (!about) {
-    throw new ApiError(404, "About section not found");
-  }
-
   return res
     .status(200)
-    .json(new ApiResponse(200, "About section retrieved", about));
+    .json(new ApiResponse(200, "About section retrieved", about ?? null));
 });
 
 export { createAbout, getAboutSection };

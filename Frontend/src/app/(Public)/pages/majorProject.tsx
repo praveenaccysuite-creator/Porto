@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import TiltedCard from "../components/TiltedCard";
-import { MajorProjectInfo } from '@/services/projectService';
+import { MajorProjectInfo } from "@/services/projectService";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -26,11 +26,11 @@ const itemVariants = {
 };
 
 export default function MajorProjects({ data }: { data: MajorProjectInfo[] }) {
-
   const projects = data;
 
-
-  
+  if (projects.length === 0) {
+    return null;
+  }
 
   return (
     <section className="major-projects-section">
@@ -67,29 +67,28 @@ export default function MajorProjects({ data }: { data: MajorProjectInfo[] }) {
 
       
 
-      {/* ✅ Projects Grid */}
-        <motion.div
-          className="projects-grid"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          {projects.map((project : any) => (
-            <motion.div key={project.id} variants={itemVariants}>
-              <TiltedCard
-                imageSrc={project.image}
-                altText={project.title}
-                title={project.title}
-                description={project.description}
-                technologies={project.technologies}
-                liveUrl={project.liveUrl}
-                githubUrl={project.githubUrl || ''}
-                containerHeight="350px"
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+      <motion.div
+        className="projects-grid"
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+      >
+        {projects.map((project) => (
+          <motion.div key={project.id} variants={itemVariants}>
+            <TiltedCard
+              imageSrc={project.image}
+              altText={project.title}
+              title={project.title}
+              description={project.description}
+              technologies={project.technologies}
+              liveUrl={project.liveUrl}
+              githubUrl={project.githubUrl || ""}
+              containerHeight="350px"
+            />
+          </motion.div>
+        ))}
+      </motion.div>
       
 
     

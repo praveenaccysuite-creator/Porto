@@ -6,6 +6,10 @@ import { experienceInfo } from "@/services/experience.service";
 const ExperienceSection = ({ data }: { data: experienceInfo[] }) => {
   const experiences = data;
 
+  if (experiences.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mt-16 mx-auto max-w-7xl relative">
       {/* Section Title */}
@@ -19,11 +23,8 @@ const ExperienceSection = ({ data }: { data: experienceInfo[] }) => {
         <div className="absolute w-20 h-1 bg-pink-500 left-1/2 -translate-x-1/2 bottom-[-12px]"></div>
       </h1>
 
-      {/* Scroll Stack Container */}
       <ScrollStackContainer className="mt-10">
-        {experiences &&
-          experiences.length > 0 &&
-          experiences?.map((exp: experienceInfo, index: number) => {
+        {experiences.map((exp: experienceInfo, index: number) => {
             const Icon = FaCode;
 
             return (
@@ -143,11 +144,6 @@ const ExperienceSection = ({ data }: { data: experienceInfo[] }) => {
               </div>
             );
           })}
-        {experiences && experiences.length === 0 ? (
-          <div className="text-center text-gray-500 dark:text-gray-400">
-            No experience fetched.
-          </div>
-        ) : null}
       </ScrollStackContainer>
     </div>
   );

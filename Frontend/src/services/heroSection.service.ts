@@ -9,10 +9,10 @@ export interface heroInfo {
 }
 
 export const heroService = {
-  getInfo: async (): Promise<heroInfo> => {
+  getInfo: async (): Promise<heroInfo | null> => {
     try {
       const res = await api.get("/hero");
-      return res.data.data;
+      return res.data.data ?? null;
     } catch (error: any) {
       throw new Error(
         error.response?.data?.message || "Unable to fetch hero info"

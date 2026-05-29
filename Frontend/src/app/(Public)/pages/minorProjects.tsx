@@ -1,8 +1,8 @@
 "use client";
-import Image from 'next/image';
 import { useRef, useState, useEffect } from "react";
 import "../../../../public/assets/style/Caro.scss";
-import {  minorProjectInfo } from '../../../services/projectService';
+import { minorProjectInfo } from "../../../services/projectService";
+import RemoteImage from "../components/ui/RemoteImage";
 
 interface CardProps {
   dataImage: string;
@@ -59,12 +59,7 @@ const Card = ({ dataImage, header, link }: CardProps) => {
       <a href={link} target="_blank" rel="noopener noreferrer">
         <div className="card" style={cardStyle}>
           <div className="card-bg borders" style={cardBgTransform}>
-            <Image
-              src={dataImage}
-              alt={header}
-              layout="fill"
-              objectFit="cover"
-            />
+            <RemoteImage src={dataImage} alt={header} fill className="object-cover" />
           </div>
         </div>
         <div className="text-center text-lg text-gray-900 dark:text-gray-100 font-mono font-semibold mt-6">
@@ -75,10 +70,13 @@ const Card = ({ dataImage, header, link }: CardProps) => {
   );
 };
 
-const MinorProjectSection = ({data} : {data : minorProjectInfo[]}) => {
-
+const MinorProjectSection = ({ data }: { data: minorProjectInfo[] }) => {
   const projects = data;
   const carouselRef = useRef<HTMLDivElement>(null);
+
+  if (projects.length === 0) {
+    return null;
+  }
   
 
 
@@ -100,26 +98,20 @@ const MinorProjectSection = ({data} : {data : minorProjectInfo[]}) => {
         <div className="absolute w-20 h-1 bg-pink-500 left-1/2 -translate-x-1/2 bottom-[-12px]"></div>
       </h1>
 
-      <section style={{ maxWidth: "100%" }} className="">
+      <section style={{ maxWidth: "100%" }}>
         <div className="z-30 px-0 pt-0 pb-0 lg:px-0 xl:px-0">
-          
-         
-          {/* ✅ Projects Carousel */}
-            <div className="flex">
-             
-              <div className="carousel ml-6" ref={carouselRef}>
-                {projects.map((project) => (
-                  <Card 
-                    key={project.id} 
-                    dataImage={project.image} 
-                    header={project.header} 
-                    link={project.html_url} 
-                  />
-                ))}
-              </div>
+          <div className="flex">
+            <div className="carousel ml-6" ref={carouselRef}>
+              {projects.map((project) => (
+                <Card
+                  key={project.id}
+                  dataImage={project.image}
+                  header={project.header}
+                  link={project.html_url}
+                />
+              ))}
             </div>
-          
-          
+          </div>
         </div>
       </section>
     </>

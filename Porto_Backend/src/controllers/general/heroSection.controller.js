@@ -28,11 +28,9 @@ const getHeroSection = asyncHandler(async (req, res) => {
     where: { id: 1 },
   });
 
-  if (!hero) {
-    throw new ApiError(404, "Hero section not found");
-  }
-
-  return res.status(200).json(new ApiResponse(200, "Hero section retrieved", hero));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Hero section retrieved", hero ?? null));
 });
 
 export { createHero, getHeroSection };

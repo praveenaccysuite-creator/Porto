@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AiFillHtml5, AiFillGithub, AiFillApi } from "react-icons/ai";
 import { BiLogoTailwindCss, BiLogoNodejs } from "react-icons/bi";
 import { BsFiletypeCss, BsBootstrap } from "react-icons/bs";
-import {  SkillInfo } from "@/services/skillSection.service";
+import { SkillInfo } from "@/services/skillSection.service";
 
 import {
   FaReact,
@@ -70,16 +70,20 @@ const iconMap: { [key: string]: React.ComponentType<any> } = {
   SiPostman,
 };
 
-const SkillsSection = ({data} : {data : SkillInfo[]}) => {
-
+const SkillsSection = ({ data }: { data: SkillInfo[] }) => {
   const skills = data;
-  const [filter, setFilter] = useState("BACKEND");
 
   const categories = Array.from(
-    new Set(skills?.map((skill) => skill.category)),
-  );
+    new Set(skills.map((skill) => skill.category).filter(Boolean)),
+  ) as string[];
 
-  const filteredSkills = skills?.filter((skill) => skill.category === filter);
+  const [filter, setFilter] = useState(categories[0] ?? "BACKEND");
+
+  const filteredSkills = skills.filter((skill) => skill.category === filter);
+
+  if (skills.length === 0) {
+    return null;
+  }
 
   const headerVariants = {
     hidden: { opacity: 0, y: -30 },

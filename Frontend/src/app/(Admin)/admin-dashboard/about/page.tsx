@@ -5,6 +5,7 @@ import {
   Edit,
   Save,
   X,
+  Plus,
   User,
   FileText,
   GraduationCap,
@@ -26,6 +27,7 @@ import PortfolioInfoPage from "../portfolioInfo/page";
 import ImageUpload from "../components/ImageUpload";
 import { useAuth } from "@/app/context/AuthContext";
 import Loader from "@/app/Loader";
+import SectionEmptyState from "@/app/(Public)/components/ui/SectionEmptyState";
 
 export default function AboutPage() {
   const { showToast } = useToast();
@@ -63,12 +65,14 @@ export default function AboutPage() {
   const {
     data: heroData,
     error: heroError,
+    isLoading: heroLoading,
     setData: setHeroData,
   } = useFetch<heroInfo>(heroService.getInfo);
 
   const {
     data: aboutData,
     error: aboutError,
+    isLoading: aboutLoading,
     setData: setAboutData,
   } = useFetch<aboutInfo>(aboutService.getInfo);
 
@@ -117,7 +121,9 @@ export default function AboutPage() {
       setHeroData(updatedData);
       setIsEditingHero(false);
       showToast({
-        message: "Hero section updated successfully 🎉",
+        message: heroData
+          ? "Hero section updated successfully 🎉"
+          : "Hero section created successfully 🎉",
         type: "success",
       });
     } catch (error: any) {
@@ -126,20 +132,6 @@ export default function AboutPage() {
         message: error.message || "Failed to update hero section",
         type: "error",
       });
-    }
-  };
-
-  const startEditHero = () => {
-    if (heroData) {
-      setHeroFormData({ bio: heroData.bio });
-      setIsEditingHero(true);
-    }
-  };
-
-  const cancelEditHero = () => {
-    setIsEditingHero(false);
-    if (heroData) {
-      setHeroFormData({ bio: heroData.bio });
     }
   };
 
@@ -161,7 +153,9 @@ export default function AboutPage() {
       setIsEditingAbout(false);
 
       showToast({
-        message: "About section updated successfully 🎉",
+        message: aboutData
+          ? "About section updated successfully 🎉"
+          : "About section created successfully 🎉",
         type: "success",
       });
     } catch (error: any) {
@@ -174,8 +168,43 @@ export default function AboutPage() {
     }
   };
 
+  const emptyAboutForm = () => ({
+    bio: "",
+    image: "",
+    specialization: "",
+    education: "",
+    documents: {
+      title: "",
+      file: undefined,
+      fileUrl: "",
+    },
+  });
+
+  const startCreateHero = () => {
+    setHeroFormData({ bio: "" });
+    setIsEditingHero(true);
+  };
+
+  const startCreateAbout = () => {
+    setAboutFormData(emptyAboutForm());
+    setIsEditingAbout(true);
+  };
+
+  const startEditHero = () => {
+    setHeroFormData({ bio: heroData?.bio ?? "" });
+    setIsEditingHero(true);
+  };
+
+  const cancelEditHero = () => {
+    setIsEditingHero(false);
+    setHeroFormData({ bio: heroData?.bio ?? "" });
+  };
+
   const startEditAbout = () => {
-    if (!aboutData) return;
+    if (!aboutData) {
+      startCreateAbout();
+      return;
+    }
 
     setAboutFormData({
       bio: aboutData.bio,
@@ -195,7 +224,10 @@ export default function AboutPage() {
   const cancelEditAbout = () => {
     setIsEditingAbout(false);
 
-    if (!aboutData) return;
+    if (!aboutData) {
+      setAboutFormData(emptyAboutForm());
+      return;
+    }
 
     setAboutFormData({
       bio: aboutData.bio,
@@ -211,6 +243,8 @@ export default function AboutPage() {
   };
 
   if (!user) return null;
+
+  const isAdmin = user.role === "ADMIN";
 
   return (
     <div className="space-y-6">
@@ -238,7 +272,7 @@ export default function AboutPage() {
           <GlassCard>
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Edit About Information
+                {aboutData ? "Edit About Information" : "Add About Information"}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -363,12 +397,12 @@ export default function AboutPage() {
                   {aboutUpdating ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Updating...
+                      Saving...
                     </>
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      Update
+                      {aboutData ? "Update" : "Save"}
                     </>
                   )}
                 </button>
@@ -486,9 +520,27 @@ export default function AboutPage() {
               </div>
             </div>
           </GlassCard>
-        ) : 
-        <Loader/>
-        }
+        ) : aboutLoading ? (
+          <Loader />
+        ) : (
+          <GlassCard>
+            <SectionEmptyState
+              title="About section"
+              message="No about section data has been added yet."
+            />
+            {isAdmin && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={startCreateAbout}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add About Section
+                </button>
+              </div>
+            )}
+          </GlassCard>
+        )}
       </div>
 
       {/* Hero Section */}
@@ -498,83 +550,101 @@ export default function AboutPage() {
           Hero Section
         </h2>
 
-        {heroData ? (
+        {isEditingHero ? (
           <GlassCard delay={0.1}>
-            {isEditingHero ? (
-              <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  Edit Hero Bio
-                </h3>
-                <div>
-                  <FormTextarea
-                    label="Bio Description"
-                    value={heroFormData.bio}
-                    onChange={(value) => setHeroFormData({ bio: value })}
-                    rows={4}
-                    placeholder="Enter hero bio..."
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleUpdateHero}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Save className="w-4 h-4" />
-                    Update
-                  </button>
-                  <button
-                    onClick={cancelEditHero}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
-                  >
-                    <X className="w-4 h-4" />
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {heroData ? "Edit Hero Bio" : "Add Hero Bio"}
+              </h3>
               <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-pink-600 rounded-full flex items-center justify-center">
-                      <Sparkles className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                        Hero Bio
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Last updated:{" "}
-                        {new Date(heroData.updatedAt).toLocaleDateString()}
-                      </p>
-                    </div>
+                <FormTextarea
+                  label="Bio Description"
+                  value={heroFormData.bio}
+                  onChange={(value) => setHeroFormData({ bio: value })}
+                  rows={4}
+                  placeholder="Enter hero bio..."
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleUpdateHero}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  {heroData ? "Update" : "Save"}
+                </button>
+                <button
+                  onClick={cancelEditHero}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </GlassCard>
+        ) : heroData ? (
+          <GlassCard delay={0.1}>
+            <div>
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-gradient-to-r from-violet-600 to-pink-600 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
                   </div>
-                  {user?.role === "ADMIN" && (
-                    <button
-                      onClick={startEditHero}
-                      className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                  )}
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      Hero Bio
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Last updated:{" "}
+                      {new Date(heroData.updatedAt).toLocaleDateString()}
+                    </p>
+                  </div>
                 </div>
+                {isAdmin && (
+                  <button
+                    onClick={startEditHero}
+                    className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Bio Content
-                    </span>
-                  </div>
-                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
-                    {heroData.bio}
-                  </p>
+              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileText className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Bio Content
+                  </span>
                 </div>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-lg">
+                  {heroData.bio}
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+        ) : heroLoading ? (
+          <Loader />
+        ) : (
+          <GlassCard>
+            <SectionEmptyState
+              title="Hero section"
+              message="No hero bio has been added yet."
+            />
+            {isAdmin && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  onClick={startCreateHero}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-pink-600 text-white rounded-xl hover:shadow-lg transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Hero Bio
+                </button>
               </div>
             )}
           </GlassCard>
-        ) : 
-        <Loader />
-        }
+        )}
       </div>
 
       <div className="space-y-6">

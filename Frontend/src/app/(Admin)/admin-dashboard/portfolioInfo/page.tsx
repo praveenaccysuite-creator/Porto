@@ -13,8 +13,8 @@ import GlassCard from "../components/GlassCard";
 import FormInput from "../components/FormInput";
 import ImageUpload from "../components/ImageUpload";
 import { useToast } from "@/app/context/ToastContext";
-// import { portfolioInfoService } from "../../../../services/portfolio.service";
-import Image from "next/image";
+import { portfolioInfoService } from "@/services/portfolio.service";
+import RemoteImage from "@/app/(Public)/components/ui/RemoteImage";
 import { PortfolioInfo } from "@/types/portfolio";
 
 export default function PortfolioInfoPage({ user }: PortfolioPageProps) {
@@ -35,18 +35,9 @@ export default function PortfolioInfoPage({ user }: PortfolioPageProps) {
   useEffect(() => {
     const loadInfo = async () => {
       try {
-        const data = {
-          email: "john.doe@example.com",
-          phone: "+1234567890",
-          location: "New York, USA",
-          profileImage: "/images/profile.jpg",
-          socialLinks: {
-            github: "https://github.com/johndoe",
-            linkedin: "https://linkedin.com/in/johndoe",
-            twitter: "https://twitter.com/johndoe",
-            instagram: "https://instagram.com/johndoe",
-          },
-        };
+        const data = await portfolioInfoService.getInfo();
+        if (!data) return;
+
         setFormData({
           email: data.email || "",
           phone: data.phone || "",
@@ -55,17 +46,27 @@ export default function PortfolioInfoPage({ user }: PortfolioPageProps) {
           socialLinks: data.socialLinks || {},
         });
       } catch {
-      } finally {
+        showToast({
+          message: "Could not load portfolio info",
+          type: "error",
+        });
       }
     };
     loadInfo();
-  }, []);
+  }, [showToast]);
 
   // 🔹 Save
   const handleSave = async () => {
     try {
       setLoading(true);
-      // await portfolioInfoService.save(formData);
+      const updated = await portfolioInfoService.save(formData);
+      setFormData({
+        email: updated.email || "",
+        phone: updated.phone || "",
+        location: updated.location || "",
+        profileImage: updated.profileImage || "",
+        socialLinks: updated.socialLinks || {},
+      });
       setIsEditing(false);
       setSnapshot(null);
 
@@ -105,19 +106,17 @@ export default function PortfolioInfoPage({ user }: PortfolioPageProps) {
             {typeof formData.profileImage === "string" &&
               formData.profileImage && (
                 <div className="w-full md:w-1/3">
-                  <Image
-                    src={formData.profileImage}
+                  <RemoteImage
+                    src={
+                      typeof formData.profileImage === "string"
+                        ? formData.profileImage
+                        : ""
+                    }
                     width={300}
                     height={300}
                     alt="Profile"
                     priority
-                    className="
-                w-full
-                h-64
-                md:h-60
-                rounded-2xl
-                object-cover
-              "
+                    className="w-full h-64 md:h-60 rounded-2xl object-cover"
                   />
                 </div>
               )}

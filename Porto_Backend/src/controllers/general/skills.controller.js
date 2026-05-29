@@ -30,12 +30,13 @@ const createSkillsSection = asyncHandler(async (req, res) => {
 
 
 const getSkillsSection = asyncHandler(async (req, res) => {
-  const skills = await prisma.skill.findMany();
-  if (!skills) {
-    throw new ApiError(404, "skills section not found");
-  }
+  const skills = await prisma.skill.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
-  return res.status(200).json(new ApiResponse(200, "skills section retrieved", skills));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "skills section retrieved", skills));
 });
 
 const deleteSkillsSection = asyncHandler(async (req, res) => {

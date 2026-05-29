@@ -27,6 +27,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import FormInput from "../components/FormInput";
 import MultiSelectInput from "../components/MultiSelectInput";
 import Loader from "@/app/Loader";
+import SectionEmptyState from "@/app/(Public)/components/ui/SectionEmptyState";
 
 const experienceTypes = [
   "Full-time",
@@ -51,6 +52,7 @@ export default function ExperiencePage() {
   const { modalState, openConfirm, closeConfirm } = useConfirmModal();
 
   const [experiences, setExperiences] = useState<experienceInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState<number | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -103,6 +105,8 @@ export default function ExperiencePage() {
           message: "Failed to load experience data",
           type: "error",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchExperience();
@@ -580,8 +584,13 @@ export default function ExperiencePage() {
             ))}
           </div>
         </div>
+      ) : isLoading ? (
+        <Loader />
       ) : (
-        <Loader/>
+        <SectionEmptyState
+          title="Experience section"
+          message="No work experience has been added yet."
+        />
       )}
     </div>
   );

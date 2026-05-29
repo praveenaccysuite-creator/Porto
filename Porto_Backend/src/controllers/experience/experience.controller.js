@@ -24,12 +24,13 @@ const createExperience = asyncHandler(async (req, res) => {
 });
 
 const getExperienceSection = asyncHandler(async (req, res) => {
-  const experience = await prisma.experience.findMany();
-  if (!experience) {
-    throw new ApiError(404, "experience section not found");
-  }
+  const experience = await prisma.experience.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
-  return res.status(200).json(new ApiResponse(200, "experience section retrieved", experience));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "experience section retrieved", experience));
 });
 
 const updateExperienceSection = asyncHandler(async (req, res) => {

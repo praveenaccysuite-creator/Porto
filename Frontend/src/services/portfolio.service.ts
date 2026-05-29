@@ -4,9 +4,9 @@ import { PortfolioInfo } from "@/types/portfolio";
 
 
 export const portfolioInfoService = {
-  getInfo: async () => {
+  getInfo: async (): Promise<PortfolioInfo | null> => {
     const res = await api.get("/info");
-    return res.data.data;
+    return res.data.data ?? null;
   },
 
   save: async (data: PortfolioInfo) => {

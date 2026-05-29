@@ -304,23 +304,46 @@ function RepoActivityItem({
   );
 }
 
-export default function GitHubPageClient({
-  initialUser,
-  initialRepos,
-  initialCommits,
-  initialContributionCalendar,
-}: {
-  initialUser: GHUser;
-  initialRepos: GHRepo[];
-  initialCommits: GHCommit[];
-  initialContributionCalendar: GHContributionCalendar;
-}) {
-  const [user] = useState(initialUser);
-  const [repos] = useState(initialRepos);
-  const [commits] = useState(initialCommits);
-  const [contributionCalendar] = useState(initialContributionCalendar);
+export default function GitHubPageClient() {
+  const [user, setUser] = useState<GHUser | null>(null);
+  const [repos, setRepos] = useState<GHRepo[]>([]);
+  const [commits, setCommits] = useState<GHCommit[]>([]);
+  const [contributionCalendar, setContributionCalendar] =
+    useState<GHContributionCalendar | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAllRepos, setShowAllRepos] = useState(false);
   const [showMoreActivity, setShowMoreActivity] = useState(false);
+
+  useEffect(() => {
+    const loadGithub = async () => {
+      try {
+        setLoading(true);
+        const API = process.env.NEXT_PUBLIC_API_URL;
+        if (!API) {
+          throw new Error("API URL is not configured");
+        }
+
+        const res = await fetch(`${API}/github/overview`, { cache: "no-store" });
+        if (!res.ok) {
+          throw new Error("Failed to load GitHub data");
+        }
+
+        const data = await res.json();
+        setUser(data.user ?? null);
+        setRepos(data.repos ?? []);
+        setCommits(data.commits ?? []);
+        setContributionCalendar(data.contributionCalendar ?? null);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load GitHub data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGithub();
+  }, []);
 
   const toggleShowMoreActivity = useCallback(() => {
     setShowMoreActivity((p) => !p);
@@ -353,6 +376,25 @@ const itemVariants = {
     },
   },
 };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-600 dark:text-gray-300">
+        Loading GitHub profile…
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-3 px-4 text-center">
+        <Header hiddenNav={true} />
+        <p className="text-gray-600 dark:text-gray-300">
+          {error ?? "GitHub data is unavailable right now."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -560,7 +602,9 @@ const itemVariants = {
               </motion.section>
 
               <motion.section variants={itemVariants}>
-                <GitHubContributionGraph calendar={contributionCalendar} />
+                <GitHubContributionGraph
+                  calendar={contributionCalendar ?? undefined}
+                />
               </motion.section>
 
               {/* ── Contribution Activity ── */}

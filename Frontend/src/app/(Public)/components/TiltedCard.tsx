@@ -2,7 +2,7 @@
 import type { SpringOptions } from 'framer-motion';
 import { useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import Image from 'next/image';
+import RemoteImage from "./ui/RemoteImage";
 
 interface TiltedCardProps {
   imageSrc: string;
@@ -103,11 +103,11 @@ export default function TiltedCard({
       >
         {/* Image Layer */}
         <div className="card-image-wrapper">
-          <Image
+          <RemoteImage
             src={imageSrc}
             alt={altText}
-            layout="fill"
-            className="card-image"
+            fill
+            className="card-image object-cover"
           />
         </div>
 

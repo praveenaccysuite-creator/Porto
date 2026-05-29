@@ -65,13 +65,11 @@ export const getInfo = asyncHandler(async (req, res) => {
     where: { id: 1 },
   });
 
-  if (!info) {
-    throw new ApiError(404, "Portfolio info not found");
+  if (info) {
+    await redis.set(cacheKey, JSON.stringify(info), "EX", 300); // TTL = 5 mins
   }
-
-  await redis.set(cacheKey, JSON.stringify(info), "EX", 300); // TTL = 5 mins
 
   return res
     .status(200)
-    .json(new ApiResponse(200, "Portfolio info retrieved (DB)", info));
+    .json(new ApiResponse(200, "Portfolio info retrieved (DB)", info ?? null));
 });

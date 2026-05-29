@@ -16,6 +16,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import FormInput from "../components/FormInput";
 import { useAuth } from "@/app/context/AuthContext";
 import Loader from "@/app/Loader";
+import SectionEmptyState from "@/app/(Public)/components/ui/SectionEmptyState";
 
 const skillCategories = ["FRONTEND", "BACKEND", "DATABASE", "DEVOPS", "OTHERS"];
 
@@ -37,6 +38,7 @@ export default function SkillsPage() {
   const { modalState, openConfirm, closeConfirm } = useConfirmModal();
 
   const [skills, setSkills] = useState<SkillInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -76,6 +78,8 @@ export default function SkillsPage() {
           message: "Failed to load skills",
           type: "error",
         });
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -407,9 +411,14 @@ export default function SkillsPage() {
         isLoading={deleteLoading}
       />
 
-      {skills.length === 0 && !isCreating && (
-       <Loader/>
-      )}
+      {isLoading ? (
+        <Loader />
+      ) : skills.length === 0 && !isCreating ? (
+        <SectionEmptyState
+          title="Skills section"
+          message="No skills have been added yet."
+        />
+      ) : null}
     </div>
   );
 }

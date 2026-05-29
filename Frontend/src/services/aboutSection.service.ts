@@ -26,9 +26,9 @@ export interface AboutFormData {
 }
 
 export const aboutService = {
-  getInfo: async (): Promise<aboutInfo> => {
+  getInfo: async (): Promise<aboutInfo | null> => {
     const res = await api.get("/about");
-    return res.data.data;
+    return res.data.data ?? null;
   },
 
 updateInfo: async (data: AboutFormData): Promise<aboutInfo> => {

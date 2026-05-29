@@ -28,11 +28,9 @@ const createEducation = asyncHandler(async (req, res) => {
 });
 
 const getEducationSection = asyncHandler(async (req, res) => {
-  const education = await prisma.educationCard.findMany();
-
-  if (!education) {
-    throw new ApiError(404, "education section not found");
-  }
+  const education = await prisma.educationCard.findMany({
+    orderBy: { createdAt: "desc" },
+  });
 
   return res
     .status(200)

@@ -1,14 +1,12 @@
 "use client";
+
 import {
   createContext,
   useContext,
   useState,
-  useRef,
   useMemo,
-  useEffect,
 } from "react";
 import { PortfolioInfo } from "@/types/portfolio";
-// import { portfolioInfoService } from "../../services/portfolio.service";
 
 interface PortfolioInfoContextType {
   info: PortfolioInfo | null;
@@ -18,48 +16,16 @@ interface PortfolioInfoContextType {
 const PortfolioInfoContext =
   createContext<PortfolioInfoContextType | null>(null);
 
-
 export const PortfolioInfoProvider = ({
   children,
+  initialInfo = null,
 }: {
   children: React.ReactNode;
+  initialInfo?: PortfolioInfo | null;
 }) => {
-  const [info, setInfo] = useState<PortfolioInfo | null>(null);
+  const [info, setInfo] = useState<PortfolioInfo | null>(initialInfo);
 
-  const fetchedRef = useRef(false);
-
-  useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
-
-    const fetchInfo = async () => {
-      try {
-        // const data = await portfolioInfoService.getInfo();
-        const data = {
-          email: "john.doe@example.com",
-          phone: "+1234567890",
-          location: "New York, USA",
-          profileImage: "/images/profile.jpg",
-          socialLinks: {
-            github: "https://github.com/johndoe",
-            linkedin: "https://linkedin.com/in/johndoe",
-            twitter: "https://twitter.com/johndoe",
-            instagram: "https://instagram.com/johndoe",
-          },
-        };
-        setInfo(data);
-      } catch (error) {
-        console.error("Failed to fetch portfolio info:", error);
-      }
-    };
-
-    fetchInfo();
-  }, []);
-
-  const value = useMemo(
-    () => ({ info, setInfo }),
-    [info]
-  );
+  const value = useMemo(() => ({ info, setInfo }), [info]);
 
   return (
     <PortfolioInfoContext.Provider value={value}>
@@ -68,13 +34,12 @@ export const PortfolioInfoProvider = ({
   );
 };
 
-
 export const usePortfolioInfoContext = (): PortfolioInfoContextType => {
   const context = useContext(PortfolioInfoContext);
 
   if (!context) {
     throw new Error(
-      "usePortfolioInfoContext must be used within PortfolioInfoProvider"
+      "usePortfolioInfoContext must be used within PortfolioInfoProvider",
     );
   }
 
